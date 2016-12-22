@@ -29,7 +29,7 @@ This is not the primary source of the entropy rate equation. In this paper, they
 
 ### How to clean:
 
->	make cleam
+>	make clean
 
 ### How to run:
 	./Debug/lzEntropy <input_file> <input_file_record_count_without_header>
