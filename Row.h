@@ -2,7 +2,7 @@
  * Please report any bug to the author:
  * +----------------------------------+
  * | Author: Tuhin Paul               |
- * |  Email: tuhin.paul@yahoo.com     |
+ * |  Email: tup500@mail.usask.ca     |
  * |  Phone: 306 880 5494             |
  * +----------------------------------+
  *
