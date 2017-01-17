@@ -39,7 +39,7 @@ This is not the primary source of the entropy rate equation. In this paper, they
 >	make clean
 
 ### How to run:
-	./Debug/lzEntropy <input_file> <input_file_record_count_without_header>
+	./Debug/lzEntropy <input_file>
 
 
 Limitation(s):
