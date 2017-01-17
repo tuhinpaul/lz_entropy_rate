@@ -14,6 +14,7 @@
 #include <math.h>       /* log2 */
 #include <fstream>
 #include <cstdlib>
+#include <cctype>       /* isdigit */
 
 #include "LZEntropy.h"
 #include "Row.h"
@@ -48,6 +49,8 @@ int main (int argc, char* argv[])
 		throw eMsg;
 	}
 
+	char iFDelimiter = ',';
+
 	// file path
 	string fPath(argv[1]);
 	
@@ -70,7 +73,9 @@ int main (int argc, char* argv[])
 	}
 	
 	Row<long> *rows = new Row<long>[numLines - 1]; // because there should be a header
-	int numRecords = 0; // actual num of records
+
+	int numRecords = 0; // actual num of records to consider
+	                    // empty lines in the input file are ignored
 
 	string line;
 	ifstream myfile ( fPath.c_str() );
@@ -82,35 +87,146 @@ int main (int argc, char* argv[])
 		int rNo = 0;
 		while ( getline (myfile,line) )
 		{
-			int iTrim = 0;   // trim scanning index
-			while ( isspace( line[iTrim] ) )
-				iTrim++; 
-			int trimStartsAt = iTrim;
+			Row<long> *curRowHead = NULL; // anchor to the current set of numbers
+			Row<long> *curRow = NULL;     // moving pointer to add new numbers
 			
-			int lastNonSpace = iTrim;
-			while ( line[iTrim] != '\0' )
-			{
-				if ( ! isspace( line[iTrim] ) )
-					lastNonSpace = iTrim;
+			bool inAWord = false;      // flag to scan if we are inside a word during scanning the line
 
-				iTrim++;
+			bool containsWord = false; // flag to check if there's any (numerical) word in the line.
+			                           // if no word is contained, the line will be dropped.
+			
+			int iLinePrev = 0; // index of previous non-space character
+			int iLine = 0;     // index of current scanned character
+			for( ; line[iLine] != '\0'; iLine++ )
+			{
+				if ( isspace(line[iLine]) || line[iLine] == iFDelimiter )
+				{
+					// space found
+
+					if (inAWord)
+					{
+						// whitespace starts after a word (should be numerical word)
+
+						// get the number from the word:
+						long x = atol( line.substr(iLinePrev, iLine-iLinePrev).c_str() );
+
+						// if the set of current numbers is empty, then initialize
+						// OR
+						// add next node to the linked list
+						if (curRowHead == NULL)
+						{
+							curRowHead = new Row<long>;
+							curRow = curRowHead;
+						}
+						else
+						{
+							curRow->addNext();
+							curRow = curRow->getNext();
+						}
+
+						// update the default current value with the found number
+						curRow->setVal(x);
+
+						// we are not in any word now
+						inAWord = false;
+						
+					}
+					else
+					{
+						// continuation of whitespace
+						// just ignore
+					}
+				}
+				else
+				{
+					// non-space character found
+					
+					if (! isdigit(line[iLine]) )
+					{
+						string eMsg = "Non-digit character found in the line";
+						cerr << "ERROR (Line " << __LINE__ << "): " << eMsg << endl;
+						throw eMsg;
+					}
+
+
+					if (inAWord)
+					{
+						// continuation of a word
+						// do nothing - address the word when a whitespace OR '\0' terminates the word
+					}
+					else
+					{
+						// a new word starts
+
+						inAWord = true;
+						
+						// store the index where this new word starts
+						iLinePrev = iLine;
+						
+						// there's a word at least- so don't drop the line
+						if (! containsWord)
+							containsWord = true;
+					}
+				}
 			}
 			
-			if ( trimStartsAt == lastNonSpace ) // no non-space character
-				continue;
-			else
+			// If there was an (unprocessed) word before '\0':
+			if (inAWord)
 			{
-				line = line.substr( trimStartsAt, (lastNonSpace - trimStartsAt + 1) );
-				
-				int commaPos = line.find_first_of(",");
-				long x = atol(line.substr(0, commaPos).c_str());
-				long y = atol(line.substr(commaPos+1).c_str());
-				// todo: what if there are more than 2 values in a row?
+				// get the number from the word:
+				long x = atol( line.substr(iLinePrev, iLine-iLinePrev).c_str() );
 
-				rows[rNo].setVal(x);
-				rows[rNo].addNext();
-				rows[rNo].getNext()->setVal(y);
+				// if the set of current numbers is empty, then initialize
+				// OR
+				// add next node to the linked list
+				if (curRowHead == NULL)
+				{
+					curRowHead = new Row<long>();
+					curRow = curRowHead;
+				}
+				else
+				{
+					curRow->addNext();
+					curRow = curRow->getNext();
+				}
+
+				// update the default current value with the found number
+				curRow->setVal(x);
+
+				// we don't need to modify [inAWord] flag here
+			}
+			
+			if ( containsWord ) // at least one number found in current line
+			{
+				curRow = curRowHead;
 				
+				Row<long> *rowInArr = &(rows[rNo]);
+				if (rowInArr == NULL)
+				{
+					
+					string eMsg = "rowInArr should not be null";
+					cerr << "ERROR (rNo = " << rNo << "): " << eMsg << endl;
+					throw eMsg;
+				}
+				
+				while (curRow != NULL)
+				{
+					// update value in the array at the current index
+					rowInArr->setVal( curRow->getVal() );
+					
+					// IF there is an element next:
+					// add a new node to the row in the array
+					if ( curRow->getNext() != NULL )
+					{
+						rowInArr->addNext();
+						rowInArr = rowInArr->getNext();
+					}
+
+					// advance curRow
+					curRow = curRow->getNext();					
+				}
+				
+				// number of nonempty rows
 				rNo++;
 			}
 		}

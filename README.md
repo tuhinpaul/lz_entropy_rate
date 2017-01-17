@@ -16,6 +16,13 @@ What this program does:
 -----------------------
 
 Calculates LZ entropy rate of a sequence of 2D coordinates whose elements have long data type.
+I ran this program on linux but this program should run okay on windows/mac.
+First line of the input file is assumed to be the header, and is ignored in entropy rate calculation.
+Obviously if you have different numbers of elements on different lines, your header may not match a line later in the file.
+The program now supports differnt numbers of numbers in different lines.
+Comma and whitespace characters (except '\r' and '\r\n') are used as number delimiters.
+A line with no numbers is ignored.
+If a line has non-digit character that is not a delimiter or newline character, an exception will be thrown.
 
 Learn about the LZ entropy rate calculation from the supporting online material for the following paper.
 This is not the primary source of the entropy rate equation. In this paper, they mention entropy, not entropy rate.
@@ -35,15 +42,10 @@ This is not the primary source of the entropy rate equation. In this paper, they
 	./Debug/lzEntropy <input_file> <input_file_record_count_without_header>
 
 
-Limitations:
-------------
+Limitation(s):
+--------------
 
-For my project, I needed to calculate entropy rate of a sequence of 2D coordinates. And the coordinate elements are expected to be long data types.
-I shall remove limitations on the number of items in each row if I need to - no plan to do it now.
-
-As of now, there is no sanity check for input data types - no plan to update now.
-
-There should be a newline at the end of the input file. I ran this program on linux but this program should run okay on windows/mac.
+TODO: There should be a newline at the end of the input file. Remove this requirement
 
 
 Naming confusion:
