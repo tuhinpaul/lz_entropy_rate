@@ -66,11 +66,7 @@ int main (int argc, char* argv[])
 	}
 	
 	if ( chLast != (int)'\n' )
-	{
-		string eMsg = "There is not a \'\\n\' at the end of the input file!";
-		cerr << "ERROR: " << eMsg << endl;
-		throw eMsg;
-	}
+		++numLines;
 	
 	Row<long> *rows = new Row<long>[numLines - 1]; // because there should be a header
 

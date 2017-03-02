@@ -45,7 +45,10 @@ This is not the primary source of the entropy rate equation. In this paper, they
 Limitation(s):
 --------------
 
-TODO: There should be a newline at the end of the input file. Remove this requirement
+Newline character ('\n') is considered as the line separator.
+Not tested in Windows OS, where the line separator is "\r\n".
+If you have an input file created in windows, you may use the dos2unix command in linux to convert "\r\n" to '\n'.
+It will not work properly if the line separator is '\r'.
 
 
 Naming confusion:
